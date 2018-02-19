@@ -19,7 +19,7 @@ This docker image backup and encrypt PostgreSQL database to S3/Minio periodicall
            --network your-network \
            chaifeng/postgres-backup-s3-gpg
 
-### Backup to your own Mino server
+### Backup to your own Minio server
 
     docker run -d --restart unless-stopped \
            --name postgres_backup \
