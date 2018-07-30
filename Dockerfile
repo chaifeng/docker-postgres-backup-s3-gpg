@@ -15,7 +15,8 @@ ENV AWS_ACCESS_KEY_ID="" \
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-           cron gpgv2 python python-pip python-setuptools python-wheel \
+           python3 python3-pip python3-setuptools python3-wheel \
+           cron wget \
     && pip install awscli \
     && apt-get clean autoclean \
     && apt-get autoremove --yes \
