@@ -1,10 +1,15 @@
 #!/bin/bash
+source /etc/profile.d/s3.sh
+
 [[ -n "${DEBUG:-}" ]] && set -x
 set -eu -o pipefail
 
-PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+if [[ "$-" = *x* ]]; then
+  exec 42>>"${DEBUG_LOG_FILE:=/debug.txt}"
+  export BASH_XTRACEFD=42
+fi
 
-source /etc/profile.d/s3.sh
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 AWS_CLI_OPTS=()
 [[ -n "${AWS_ENDPOINT}" ]] && AWS_CLI_OPTS+=(--endpoint-url "$AWS_ENDPOINT")
