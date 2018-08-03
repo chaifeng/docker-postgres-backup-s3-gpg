@@ -2,13 +2,36 @@
 [[ -n "${DEBUG:-}" ]] && set -x
 set -eu -o pipefail
 
-BACKUP_SCRIPT="${BASH_SOURCE%/*}/postgres-backup.sh"
+README_FILE=/README.md
 
-if [[ -z "${PGP_KEY:-}" ]]; then
-    printf 'Fatal: environment variable PGP_KEY is empty.\nNeed your PGP key to encrypt files.\nExit in 10 seconds.\n'
-    sleep 10
-    exit 1
+function env_list() {
+  grep -Eo "^- \`[_A-Z]+\`\$" "$README_FILE" | grep -Eo '[_A-Z]+'
+}
+
+function env_help() {
+  grep -A1 -F -- "- \`$1\`" "$README_FILE" | sed -e 1d -e 's/^ \+//'
+}
+
+function err() {
+  echo -e "$@" >&2
+}
+
+
+FOUND_ERROR=false
+for ENVNAME in $(env_list); do
+    if eval "test -z \"\${${ENVNAME}:-}\""; then
+      err "\\nFatal: \`${ENVNAME}\` is empty.\\n\\t$(env_help "${ENVNAME}")"
+      FOUND_ERROR=true
+    fi
+done
+
+if "$FOUND_ERROR"; then
+  err "\\nExit in 10 seconds."
+  sleep 10
+  exit 1
 fi
+
+BACKUP_SCRIPT="${BASH_SOURCE%/*}/postgres-backup.sh"
 
 if grep '^\(http\|https\|ftp\)://' <<< "$PGP_KEY" &>/dev/null; then
     echo "Download PGP key from $PGP_KEY ..." >&2
@@ -48,6 +71,10 @@ case "$1" in
         exec "$BACKUP_SCRIPT"
         ;;
     *)
-        exec "$@"
+        if [[ -x "$1" ]]; then
+          exec "$@"
+        else
+          cat "$README_FILE" >&2
+        fi
         ;;
 esac
