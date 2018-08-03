@@ -17,7 +17,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
            python3 python3-pip python3-setuptools python3-wheel \
            cron wget \
-    && pip install awscli \
+    && pip3 install awscli \
     && apt-get clean autoclean \
     && apt-get autoremove --yes \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/ \
