@@ -4,10 +4,22 @@ set -eu -o pipefail
 
 BACKUP_SCRIPT="${BASH_SOURCE%/*}/postgres-backup.sh"
 
-if [[ -z "${PGP_KEY}" ]]; then
-    printf "Fatal: PGP_KEY is empty.\nNeed your PGP key to encrypt files.\nExit in 10 seconds.\n"
+if [[ -z "${PGP_KEY:-}" ]]; then
+    printf 'Fatal: environment variable PGP_KEY is empty.\nNeed your PGP key to encrypt files.\nExit in 10 seconds.\n'
     sleep 10
     exit 1
+fi
+
+if grep '^\(http\|https\|ftp\)://' <<< "$PGP_KEY" &>/dev/null; then
+    echo "Download PGP key from $PGP_KEY ..." >&2
+    wget --no-check-certificate -O /pgp-key.txt "$PGP_KEY"
+    PGP_KEY=/pgp-key.txt
+fi
+
+if [[ -f "${PGP_KEY}" ]]; then
+    echo "Import PGP key from local file $PGP_KEY ..." >&2
+    PGP_KEY="$(gpg --import "$PGP_KEY" |& grep -o '[0-9A-F]\{16,\}')"
+    export PGP_KEY
 fi
 
 while ! gpg --list-key "${PGP_KEY}"; do
@@ -16,7 +28,7 @@ while ! gpg --list-key "${PGP_KEY}"; do
     sleep 5
 done
 
-echo trusted-key "${PGP_KEY}" >> "$HOME/.gnupg/gpg.conf"
+gpg --update-trustdb --trusted-key "${PGP_KEY}"
 
 export -p | grep '\(AWS\|BACKUP\|PGP\|POSTGRES\|DEBUG\|TZ\)' > /etc/profile.d/s3.sh
 
