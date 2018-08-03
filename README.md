@@ -35,6 +35,36 @@ This docker image backup and encrypt PostgreSQL database to S3/Minio periodicall
            --network your-network \
            chaifeng/postgres-backup-s3-gpg
 
+### Use a local PGP public key file
+
+    docker run -d --restart unless-stopped \
+           --name postgres_backup \
+           -e AWS_ACCESS_KEY_ID="your-access-key" \
+           -e AWS_SECRET_ACCESS_KEY="your-secret-access-keys" \
+           -v /path/to/your/pgp-key.txt:/pgp.txt \
+           -e PGP_KEY=/pgp.txt \
+           -e BACKUP_SCHEDULE="0 * * * *" \
+           -e POSTGRES_DB=your-dbname \
+           -e POSTGRES_HOST=your-postgres-container \
+           -e POSTGRES_USER=your-postgres-username \
+           -e POSTGRES_PASSWORD="your-postgres-password" \
+           --network your-network \
+           chaifeng/postgres-backup-s3-gpg
+
+### Use a remote PGP public key file
+
+    docker run -d --restart unless-stopped \
+           --name postgres_backup \
+           -e AWS_ACCESS_KEY_ID="your-access-key" \
+           -e AWS_SECRET_ACCESS_KEY="your-secret-access-keys" \
+           -e PGP_KEY=https://exaple.com/pgp-key.txt \
+           -e BACKUP_SCHEDULE="0 * * * *" \
+           -e POSTGRES_DB=your-dbname \
+           -e POSTGRES_HOST=your-postgres-container \
+           -e POSTGRES_USER=your-postgres-username \
+           -e POSTGRES_PASSWORD="your-postgres-password" \
+           chaifeng/postgres-backup-s3-gpg
+
 ## Variables
 
 - `AWS_ACCESS_KEY_ID`
