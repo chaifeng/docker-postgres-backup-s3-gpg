@@ -1,4 +1,4 @@
-FROM postgres:10.4
+FROM postgres:9.6.7
 
 ENV AWS_ACCESS_KEY_ID="" \
     AWS_SECRET_ACCESS_KEY="" \
